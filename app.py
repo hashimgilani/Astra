@@ -17,11 +17,8 @@ st.caption("Where data becomes direction.")
 st.write("See your store clearly — upload your ecommerce CSV to get instant insights.")
 
 # ----------------------------
-# Sidebar: API Key + Settings
+# Groq API Key (auto from Streamlit secrets; fallback to env var; optional manual input for local)
 # ----------------------------
-st.sidebar.header("🔑 API Settings")
-
-# --- Groq API Key (auto from Streamlit secrets; fallback to env var; optional manual input for local) ---
 groq_api_key = None
 
 # 1) Streamlit Cloud secrets (preferred)
@@ -31,16 +28,6 @@ if "GROQ_API_KEY" in st.secrets:
 # 2) Local environment variable fallback
 elif os.getenv("GROQ_API_KEY"):
     groq_api_key = os.getenv("GROQ_API_KEY")
-
-# 3) Optional manual input fallback (local dev only)
-else:
-    with st.sidebar:
-        st.header("🔑 API Settings")
-        groq_api_key = st.text_input("Groq API Key", type="password")
-        st.caption("For Streamlit Cloud, store this in Secrets instead.")
-
-st.sidebar.markdown("---")
-show_debug = st.sidebar.checkbox("Show debug info (columns + dtypes)", value=False)
 
 # ----------------------------
 # Robust CSV Loader
@@ -120,13 +107,7 @@ if "Quantity" in df.columns and "UnitPrice" in df.columns:
 
 # Preview
 st.subheader("👀 Preview of Data")
-st.dataframe(df.head(20), use_container_width=True)
-
-if show_debug:
-    st.markdown("**Detected columns:**")
-    st.write(list(df.columns))
-    st.markdown("**Detected dtypes:**")
-    st.write(df.dtypes)
+st.dataframe(df.head(10), use_container_width=True)
 
 # ----------------------------
 # Column selection UI
@@ -264,7 +245,7 @@ if st.button("🔍 Run Analysis"):
     # ----------------------------
     # Declining products (Last 30 days vs Previous 30 days)
     # ----------------------------
-    st.subheader("📉 Declining Products (Last 30 days vs Previous 30 days)")
+    st.subheader("📉 Declining Products (Recent Performance Change)")
 
     df_decl = df_clean.copy()
 
@@ -305,12 +286,6 @@ if st.button("🔍 Run Analysis"):
     # AI Insights (Groq)
     # ----------------------------
     st.subheader("🤖 AI Insights")
-    st.caption("Tip: You can store your key once on your Mac and never paste again (we’ll do that next).")
-
-    st.info(
-        "🤖 AI Insights will be available in the public version of Astra. "
-        "This demo focuses on core ecommerce analytics."
-    )
 
     # Compact summary for LLM (reduce tokens)
     summary = {
@@ -326,9 +301,9 @@ if st.button("🔍 Run Analysis"):
 You are a senior ecommerce analyst.
 
 Given this dataset summary, provide:
-1) 5 key revenue insights (seasonality, spikes, growth/decline)
-2) 3 likely reasons behind these patterns
-3) 5 actionable recommendations for the store owner (specific, practical, prioritized)
+5 key revenue insights (seasonality, spikes, growth/decline)
+3 likely reasons behind these patterns
+5 actionable recommendations for the store owner (specific, practical, prioritized)
 
 DATA SUMMARY:
 {summary}
