@@ -21,9 +21,23 @@ st.write("See your store clearly — upload your ecommerce CSV to get instant in
 # ----------------------------
 st.sidebar.header("🔑 API Settings")
 
-# Pull from environment if available; otherwise user can paste
-default_key = os.environ.get("GROQ_API_KEY", "")
-groq_api_key = st.sidebar.text_input("Groq API Key", value=default_key, type="password")
+# --- Groq API Key (auto from Streamlit secrets; fallback to env var; optional manual input for local) ---
+groq_api_key = None
+
+# 1) Streamlit Cloud secrets (preferred)
+if "GROQ_API_KEY" in st.secrets:
+    groq_api_key = st.secrets["GROQ_API_KEY"]
+
+# 2) Local environment variable fallback
+elif os.getenv("GROQ_API_KEY"):
+    groq_api_key = os.getenv("GROQ_API_KEY")
+
+# 3) Optional manual input fallback (local dev only)
+else:
+    with st.sidebar:
+        st.header("🔑 API Settings")
+        groq_api_key = st.text_input("Groq API Key", type="password")
+        st.caption("For Streamlit Cloud, store this in Secrets instead.")
 
 st.sidebar.markdown("---")
 show_debug = st.sidebar.checkbox("Show debug info (columns + dtypes)", value=False)
