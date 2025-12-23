@@ -269,13 +269,13 @@ if st.button("🔍 Run Analysis"):
     prev_sum = prev_30.groupby(product_col)[num_col].sum()
 
     compare = pd.DataFrame({
-        "Previous 30 days": prev_sum,
-        "Last 30 days": last_sum
+        "Peak Period Revenue": prev_sum,
+        "Recent Period Revenue": last_sum
     }).fillna(0.0)
 
-    compare["Change"] = compare["Last 30 days"] - compare["Previous 30 days"]
+    compare["Change"] = compare["Recent Period Revenue"] - compare["Peak Period Revenue"]
     compare["% Change"] = compare.apply(
-        lambda r: (r["Change"] / r["Previous 30 days"] * 100) if r["Previous 30 days"] > 0 else None,
+        lambda r: (r["Change"] / r["Peak Period Revenue"] * 100) if r["Peak Period Revenue"] > 0 else None,
         axis=1
     )
 
