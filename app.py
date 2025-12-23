@@ -59,6 +59,22 @@ def load_csv_any_encoding(file) -> pd.DataFrame:
     except Exception as e:
         raise RuntimeError(f"Could not read CSV. Last error: {last_err}") from e
 
+def load_table(file) -> pd.DataFrame:
+        """
+        Loads CSV (robust encodings) or Excel (.xlsx/.xls).
+        """
+        name = (getattr(file, "name", "") or "").lower()
+
+        if name.endswith(".csv"):
+            return load_csv_any_encoding(file)
+
+        if name.endswith(".xlsx") or name.endswith(".xls"):
+            file.seek(0)
+            return pd.read_excel(file)
+
+        raise RuntimeError("Unsupported file type. Please upload a CSV or Excel file.")
+
+
 # ----------------------------
 # Helpers: smart default column choices
 # ----------------------------
@@ -85,7 +101,8 @@ def guess_numeric_column(cols):
 # ----------------------------
 # File upload
 # ----------------------------
-uploaded_file = st.file_uploader("📂 Upload a CSV file", type=["csv"])
+uploaded_file = st.file_uploader("📂 Upload a CSV or Excel file", type=["csv", "xlsx", "xls"])
+
 
 if uploaded_file is None:
     st.info("☝️ Upload a CSV file to get started.")
@@ -93,7 +110,7 @@ if uploaded_file is None:
 
 # Load CSV
 try:
-    df = load_csv_any_encoding(uploaded_file)
+    df = load_table(uploaded_file)
 except Exception as e:
     st.error(f"Could not read your CSV: {e}")
     st.stop()
