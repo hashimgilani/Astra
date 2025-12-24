@@ -118,6 +118,15 @@ except Exception as e:
 # Remove obvious junk columns
 df = df.loc[:, ~df.columns.astype(str).str.contains("^Unnamed", case=False, regex=True)]
 
+# ✅ SAFETY: if all columns were removed, stop with a friendly error
+if df.shape[1] == 0:
+    st.error(
+        "No readable columns found in this file. "
+        "If you're uploading Excel, make sure the first row contains column names, "
+        "then export as CSV (UTF-8) or upload a properly formatted Excel sheet."
+    )
+    st.stop()
+
 # Add ecommerce-friendly Revenue column if possible
 if "Quantity" in df.columns and "UnitPrice" in df.columns:
     df["Revenue"] = pd.to_numeric(df["Quantity"], errors="coerce") * pd.to_numeric(df["UnitPrice"], errors="coerce")
